@@ -34,7 +34,9 @@ DecisionTreeClassifier(ccp_alpha=0.0, class_weight=None, criterion='gini',
 ```
 - 성능
 ```
-
+F1:  0.7478
+Prec:  0.7049
+Recall:  0.7963
 ```
 2. Random Forest
 - 학습된 모델
