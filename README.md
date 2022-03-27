@@ -108,11 +108,6 @@ Recall:  0.8148
 
 
 ---
-## 1등 모델 성능 높이기
-
-
-
----
 ## Future work: 어떻게 성능 더 높일 것인가?
 - 성능 높일 수 있는 포인트
     - 데이터 관점
@@ -122,7 +117,7 @@ Recall:  0.8148
         - 시간 관계상 interaction feature 고려하지 않았음
         - dimenstionality 조절
     - 모델 관점
-        - 다른 방식의 하이퍼파라미터 튜닝 적용
+        - 여러 방식의 하이퍼파라미터 튜닝 적용
         - 다양한 모델 앙상블 기법 사용
             - stacking, blending에도 weight 을 줄 수 있음
         - 학습된 모델에 대한 probability threshold 최적화
