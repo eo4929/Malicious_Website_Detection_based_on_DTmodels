@@ -35,7 +35,7 @@
         - 데이터 증식 적용
         - 단순 imputer 적용했는데, iterative imputer로 multi-variate 사이 관계 기반해서 missing value 처리하기
         - 시간 관계상 interaction feature 고려하지 않았음
-        - dimenstionality reduction 적용
+        - dimenstionality 조절
     - 모델 관점
         - 다른 방식의 하이퍼파라미터 튜닝 적용
         - 다양한 모델 앙상블 기법 사용
