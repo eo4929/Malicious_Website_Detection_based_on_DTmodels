@@ -294,5 +294,5 @@ Recall:  0.9259
         - 다른 모델 활용 (e.g., deep forest, TabNet)
         - 다양한 모델 앙상블 기법 사용
             - stacking, blending에도 weight 을 줄 수 있음
-            - 가장 성능 높은 모델만 가지고 stacker 구현
+            - 가장 성능 높은 서로 다른 타입의 모델 집합들 가지고 stacker 구현
         - 학습된 모델에 대한 probability threshold 최적화
