@@ -30,6 +30,23 @@ class ModelMaker: # 빠른 테스트를 위함 (scaled data 도 일반 표준화
         self.pd_data = pd.read_csv('C:/Users/Dae-Young Park/PycharmProjects/MaliciousWebsiteDetection/final_raw_data_SimpleImputer.csv')
 
         #print(self.pd_data.head())
+        
+    def apply_PCA_to_pd_data(self):
+    pca = PCA(n_components=20) # 대충 15개로 넣어봄 (10일때, f1 맥스 0.8491 (심지어, 그냥 튜닝 버전이 젤 잘나옴) )
+
+    pd_data_categoricals =  self.pd_data[ self.pd_data.columns[14:] ]
+
+    reducted_pd_data_categoricals = pca.fit_transform(pd_data_categoricals)
+
+    #print('reducted_pd_data_categoricals: ')
+    reducted_pd_data_categoricals = pd.DataFrame(reducted_pd_data_categoricals)
+    #print(reducted_pd_data_categoricals.head())
+
+    self.pd_data = pd.concat( [self.pd_data[ self.pd_data.columns[:14] ] , reducted_pd_data_categoricals],axis=1 )
+
+    #print('self.pd_data: ')
+    #print(self.pd_data.info())
+    # 결과적으로, 1781 * 33 이 인풋
 
     def split_data(self):
         y = self.pd_data['Type']
@@ -95,6 +112,100 @@ class ModelMaker: # 빠른 테스트를 위함 (scaled data 도 일반 표준화
     def plot_models(self):
         plot_model(self.tree_based_models)
 
+    def create_predict_evaluate_XGBoost(self):
+        xgboost = create_model(estimator='xgboost')
+        print()
+        print('기본 xgboost: ')
+        print(xgboost)
+        print()
+        final_model = finalize_model(xgboost)
+        prediction_result = predict_model(final_model, data=self.X_test)
+
+        eval_f1 = check_metric(self.y_test, prediction_result['Label'], metric='F1')
+        print('F1: ', eval_f1)
+        eval_prec = check_metric(self.y_test, prediction_result['Label'], metric='Precision')
+        print('Prec: ', eval_prec)
+        eval_re = check_metric(self.y_test, prediction_result['Label'], metric='Recall')
+        print('Recall: ', eval_re)
+        print()
+        print()
+
+        tuned_xgboost = tune_model(xgboost, n_iter=15, optimize='F1', search_library='optuna', search_algorithm='tpe',
+                                   choose_better=True)
+        optimized_tuned_xgboost = optimize_threshold(tuned_xgboost, optimize='F1')
+        print()
+        print('튜닝된 xgboost: ')
+        print(optimized_tuned_xgboost)
+        print()
+        final_model = finalize_model(optimized_tuned_xgboost)
+        prediction_result = predict_model(final_model, data=self.X_test)
+
+        eval_f1 = check_metric(self.y_test, prediction_result['Label'], metric='F1')
+        print('F1: ', eval_f1)
+        eval_prec = check_metric(self.y_test, prediction_result['Label'], metric='Precision')
+        print('Prec: ', eval_prec)
+        eval_re = check_metric(self.y_test, prediction_result['Label'], metric='Recall')
+        print('Recall: ', eval_re)
+        print()
+        print()
+
+        ensemble_xgboost_bagging =  ensemble_model(optimized_tuned_xgboost, method='Bagging', optimize='F1', choose_better=False)
+        ensemble_xgboost_bagging = optimize_threshold(ensemble_xgboost_bagging, optimize='F1')
+        print()
+        print('배깅 버전 xgboost: ')
+        print(ensemble_xgboost_bagging)
+        print()
+        final_model = finalize_model(ensemble_xgboost_bagging)
+        prediction_result = predict_model(final_model, data=self.X_test)
+
+        eval_f1 = check_metric(self.y_test, prediction_result['Label'], metric='F1')
+        print('F1: ', eval_f1)
+        eval_prec = check_metric(self.y_test, prediction_result['Label'], metric='Precision')
+        print('Prec: ', eval_prec)
+        eval_re = check_metric(self.y_test, prediction_result['Label'], metric='Recall')
+        print('Recall: ', eval_re)
+        print()
+        print()
+
+        blender = blend_models([tuned_xgboost, optimized_tuned_xgboost, ensemble_xgboost_bagging],
+                               method='auto', choose_better=True, optimize='F1',
+                               probability_threshold=0.5)  # auto면 soft voting이 기본, 안될때 hard voting
+        best_blender = optimize_threshold(blender, optimize='F1')
+        print()
+        print('블랜딩 버전 xgboost: ')
+        print(best_blender)
+        print()
+        final_model = finalize_model(best_blender)
+        prediction_result = predict_model(final_model, data=self.X_test)
+
+        eval_f1 = check_metric(self.y_test, prediction_result['Label'], metric='F1')
+        print('F1: ', eval_f1)
+        eval_prec = check_metric(self.y_test, prediction_result['Label'], metric='Precision')
+        print('Prec: ', eval_prec)
+        eval_re = check_metric(self.y_test, prediction_result['Label'], metric='Recall')
+        print('Recall: ', eval_re)
+        print()
+        print()
+
+        stacker = stack_models([tuned_xgboost, optimized_tuned_xgboost, ensemble_xgboost_bagging],
+                               meta_model=None, method='auto', choose_better=True, optimize='F1',
+                               probability_threshold=0.5)
+        best_stacker = optimize_threshold(stacker, optimize='F1')
+        print()
+        print('스태킹 버전 xgboost: ')
+        print(best_stacker)
+        print()
+        final_model = finalize_model(best_stacker)
+        prediction_result = predict_model(final_model, data=self.X_test)
+
+        eval_f1 = check_metric(self.y_test, prediction_result['Label'], metric='F1')
+        print('F1: ', eval_f1)
+        eval_prec = check_metric(self.y_test, prediction_result['Label'], metric='Precision')
+        print('Prec: ', eval_prec)
+        eval_re = check_metric(self.y_test, prediction_result['Label'], metric='Recall')
+        print('Recall: ', eval_re)
+        print()
+        print()
 
     def predict_and_evaluate_four_models(self):
         print('- - - - - - - - - - - - - - - - ')
