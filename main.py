@@ -20,12 +20,15 @@ if __name__ == '__main__':
 
     models = ModelMaker()
     models.load_data()
+    models.apply_PCA_to_pd_data()
+
     models.split_data()
     models.prepare_models()
-    models.compare_models()
+    models.create_predict_evaluate_XGBoost()
+    """models.compare_models()
     models.predict_and_evaluate_four_models()
 
     models.construct_improved_model()
-    models.predict_and_evaluate_final_model()
+    models.predict_and_evaluate_final_model()"""
     #models.plot_models()
     #models.predict_and_evaluate()
